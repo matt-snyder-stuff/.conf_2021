@@ -1,0 +1,41 @@
+index=risk
+
+| lookup high_risk_user.csv user as user OUTPUT hru_status notes date_added
+
+| search hru_status=”active”
+
+| eval risk_score=if(in(user_prop, "CEO", "CFO", "COO", "Executive Vice President"), risk_mod_count+20,risk_score)
+| eval risk_score=if(total_hvf >=1 AND total_hvf <=50, risk_mod_count+10,risk_score)
+| eval risk_mod_count=if(like(aa_tech,"Correspondence_with_Competitor"),risk_mod_count+30,risk_mod_count)
+| eval risk_mod_count=if(like(aa_tech,"Pending_Resignation"),risk_mod_count+30,risk_mod_count)
+| eval risk_mod_count=if(like(aa_tech,"Pending_End_of_Contract"),risk_mod_count+30,risk_mod_count)
+| eval risk_mod_count=if(like(aa_tech,"Security_Tool_Alerts"),risk_mod_count+30,risk_mod_count)
+| eval risk_mod_count=if(like(aa_tech,"Behavior_Based"),risk_mod_count+30,risk_mod_count)
+
+| streamstats sum(risk_score) as risk_score
+dc(file) as total_files
+sum(high_value_file) as total_hvf
+values(source) as source
+dc(source) as source_count
+values(aa_tactic) as "aa_tactic"
+values(aa_tech) as "aa_tech"
+dc(aa_tactic) as  count_aa_tactic
+by user
+
+| stats  sparkline
+dc(file) as total_files
+sum(high_value_file) as total_hvf
+values(source) as source
+dc(source) as source_count
+values(aa_tactic) as "aa_tactic"
+values(aa_tech) as "aa_tech"
+dc(aa_tactic) as  count_aa_tactic
+max(risk_score) as risk_score
+max(avgRisk) as avgRisk
+values(stdevRisk) as stdevRisk
+by user
+
+| eventstats avg(risk_score) as avg_risk stdev(risk_score) as stdev_risk
+
+
+| where risk_score>avgRisk+(2*stdevRisk)

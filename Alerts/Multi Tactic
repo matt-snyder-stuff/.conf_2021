@@ -1,0 +1,16 @@
+index=risk
+
+| lookup high_risk_user.csv user as user OUTPUT hru_status notes date_added
+
+| search hru_status=”active”
+
+| eval risk_score=if(in(user_prop, "CEO", "CFO", "COO", "Executive Vice President"), risk_mod_count+20,risk_score)
+| eval risk_score=if(total_hvf >=1 AND total_hvf <=50, risk_mod_count+10,risk_score)
+| eval aa_tactic_exfil_value=case(aa_tactic == "Exfiltration", "1", aa_tactic == "Collection", "0", aa_tech == "Data_Destruction", "0")
+| eval aa_tactic_delete_value=case(aa_tactic == "Exfiltration", "0", aa_tactic == "Collection", "0", aa_tech == "Data_Destruction", "1")
+
+| eventstats avg(risk_score) as avg_risk stdev(risk_score) as stdev_risk
+
+| stats dc(file) as file_count sum(hvf) as total_hvf values(aa_tactic) as aa _tactic values(aa_tech) as aa_tech dc(aa_tactic) as aa_tactic_count dc(aa_tech) as aa_tech_count by user
+
+| where (aa_tech_count > 2 OR aa_tech_count >3)

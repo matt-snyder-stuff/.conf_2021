@@ -13,30 +13,7 @@ index=risk
 | eval risk_mod_count=if(like(aa_tech,"Security_Tool_Alerts"),risk_mod_count+30,risk_mod_count)
 | eval risk_mod_count=if(like(aa_tech,"Behavior_Based"),risk_mod_count+30,risk_mod_count)
 
-| streamstats sum(risk_score) as risk_score
-dc(file) as total_files
-sum(high_value_file) as total_hvf
-values(source) as source
-dc(source) as source_count
-values(aa_tactic) as "aa_tactic"
-values(aa_tech) as "aa_tech"
-dc(aa_tactic) as  count_aa_tactic
-by user
 
-| stats
-dc(file) as total_files
-sum(high_value_file) as total_hvf
-values(source) as source
-dc(source) as source_count
-values(aa_tactic) as "aa_tactic"
-values(aa_tech) as "aa_tech"
-dc(aa_tactic) as  count_aa_tactic
-max(risk_score) as risk_score
-max(avgRisk) as avgRisk
-values(stdevRisk) as stdevRisk
-by user
+| stats dc(file) as file_count sum(hvf) as total_hvf values(aa_tactic) as aa _tactic values(aa_tech) as aa_tech by user
 
-| eventstats avg(risk_score) as avg_risk stdev(risk_score) as stdev_risk
-
-
-| where risk_score>avgRisk+(2*stdevRisk)
+| where (risk_score>=75 AND total_hvf>=10 AND (tactic_exfil_value >=100 OR tactic_delete_value>=100))

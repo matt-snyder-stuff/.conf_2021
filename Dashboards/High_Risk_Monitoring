@@ -15,7 +15,7 @@
       <chart>
         <search>
           <query>index=risk
-| lookuphigh_risk_user.csv user as user OUTPUT user_status as  user_status Country
+| lookup high_risk_user.csv user as user OUTPUT user_status as  user_status Country
 | search user_status=active
 | stats dc(file) as total_files by source</query>
           <earliest>$time.earliest$</earliest>
@@ -61,7 +61,7 @@
       <chart>
         <search>
           <query>index=risk
-| lookuphigh_risk_user.csv user as user OUTPUT user_status as  user_status Country
+| lookup high_risk_user.csv user as user OUTPUT user_status as  user_status Country
 | search user_status=active
 | stats dc(file) as total_files by user</query>
           <earliest>$time.earliest$</earliest>
@@ -109,7 +109,7 @@
       <chart>
         <search>
           <query>index=risk
-| lookuphigh_risk_user.csv user as user OUTPUT user_status as  user_status Country
+| lookup high_risk_user.csv user as user OUTPUT user_status as  user_status Country
 | search user_status=active
 | timechart span=1h dc(file) as total_files by user useother=f limit=20</query>
           <earliest>$time.earliest$</earliest>
@@ -157,7 +157,7 @@
       <chart>
         <search>
           <query>index=risk  high_value_file=1
-| lookuphigh_risk_user.csv user as user OUTPUT user_status as  user_status Country
+| lookup high_risk_user.csv user as user OUTPUT user_status as  user_status Country
 | search user_status=active
 | timechart span=1h dc(file) as total_files by user useother=f limit=20</query>
           <earliest>$time.earliest$</earliest>
@@ -205,7 +205,7 @@
       <chart>
         <search>
           <query>index=risk
-| lookuphigh_risk_user.csv user as user OUTPUT user_status as  user_status Country
+| lookup high_risk_user.csv user as user OUTPUT user_status as  user_status Country
 | search user_status=active
 | stats sum(risk_score) as risk_score by user,_time
 | timechart span=1h sum(risk_score) as total_riskscore by user useother=false</query>
